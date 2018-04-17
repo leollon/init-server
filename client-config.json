@@ -1,58 +1,75 @@
 {
   "log": {
-    "access": "/var/log/v2ray/access.log",
+    "access": "/var/log/v2ray/access.log",  
     "error": "/var/log/v2ray/error.log",
     "loglevel": "warning"
   },
-
-  "inbound": {
-    "port": 1080,
-    "protocol": "socks",
-    "settings": {
-      "auth": "noauth"
-    }
-  },
+  
+  "inbound":
+    {
+        "port": V2RAY_CLIENT_PORT,
+        "protocol": "socks",
+        "settings":
+        {
+            "auth": "noauth"
+        }
+    },
 
   "outbound": {
-    "protocol": "vmess",
-    "settings": {
-      "vnext": [{
-        "address": "your_server_id",
-        "port": your_server_port,
-        "users": [{
-          "id": "your_uuid",
-          "alterId": 64
-        }]
-      }]
+     "protocol": "vmess",
+        "settings":
+        {
+            "vnext": [
+        {
+		  "address": "V2RAY_SERVER_IP",
+          "port": V2RAY_SERVER_PORT,
+          "users": [
+            {
+              "id": "76b5eb22-7814-11e7-b5a5-be2e44b06b34",
+              "alterId": 64
+            }
+          ]
+        }
+      ]
     },
     "streamSettings": {
       "network": "kcp"
     }
   },
-
+  "dns": {
+    "servers": [
+      "8.8.8.8",
+      "8.8.4.4",
+      "9.9.9.9",
+      "1.1.1.1",
+      "1.0.0.1"
+    ]
+  },
   "routing": {
     "strategy": "rules",
     "settings": {
-      "rules": [{
-        "type": "field",
-        "ip": [
-          "0.0.0.0/8",
-          "10.0.0.0/8",
-          "100.64.0.0/10",
-          "127.0.0.0/8",
-          "169.254.0.0/16",
-          "172.16.0.0/12",
-          "192.0.0.0/24",
-          "192.0.2.0/24",
-          "192.168.0.0/16",
-          "198.18.0.0/15",
-          "198.51.100.0/24",
-          "::1/128",
-          "fc00::/7",
-          "fe80::/10"
-        ],
-        "outboundTag": "blocked"
-      }]
+      "rules": [
+        {
+          "type": "field",
+          "ip": [
+            "0.0.0.0/8",
+            "10.0.0.0/8",
+            "100.64.0.0/10",
+            "127.0.0.0/8",
+            "169.254.0.0/16",
+            "172.16.0.0/12",
+            "192.0.0.0/24",
+            "192.0.2.0/24",
+            "192.168.0.0/16",
+            "198.18.0.0/15",
+            "198.51.100.0/24",
+            "::1/128",
+            "fc00::/7",
+            "fe80::/10"
+          ],
+          "outboundTag": "blocked"
+        }
+      ]
     }
   },
 
@@ -65,11 +82,11 @@
       "tti": 20,
       "uplinkCapacity": 12,
       "downlinkCapacity": 100,
-      "congestion": false,
+      "congestion": true,
       "readBufferSize": 1,
       "writeBufferSize": 1,
       "header": {
-        "type": "none"
+        "type": "wechat-video"
       }
     }
   }
