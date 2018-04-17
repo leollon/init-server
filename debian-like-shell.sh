@@ -1,7 +1,7 @@
 #!/bin/bash
 # run under debian-like x86_64 bit distribution
 
-set -e # The forked shell exits instantlly when one command's returned value is not zero.
+set -e # The forked shell exits instantlly when one command\'s returned value is not zero.
 
 user=$USER
 
@@ -21,13 +21,17 @@ apt install -y  vim openssh-server uuid-runtime\
                     tcptrack htop zsh
 echo "OK, basic software."
 
-uuid=$(uuidgen)
-server_ip=$(ifconfig eth0 | grep 'inet addr' | cut -d ':' -f 2 | tr -d ' [a-zA-Z]')
-v2ray_port=18989
+UUID=$(uuidgen)
+CODENAME=$(lsb_release -cs)
+ID=$(cat /etc/os-release | grep -i  "^id" | cut -d '=' -f 2)
+V2RAY_PORT=18989
+SERVER_IP=$(curl http://ipinfo.io/ip)
+#SERVER_IP=$(curl -s checkip.dyndns.org | cut -d ':' -f 2 | tr -d '[a-z\<\>\ ]')
 
 # nginx webserver
 echo "add nginx public key"
 curl -fsSL http://nginx.org/keys/nginx_signing.key -o - | apt-key add -
+echo -e "deb http://nginx.org/packages/debian/ $CODENAME nginx\ndeb-src http://nginx.org/packages/debian/ $CODENAME nginx" > /etc/apt/sources.list.d/nginx.list
 echo "OK, nginx pulick key added."
 
 # docker-related
@@ -35,24 +39,22 @@ echo "Installing docker-related"
 apt install -y  apt-transport-https \
                     ca-certificates gnupg2 \
                     software-properties-common > /dev/null 2>&1
-echo "OK, docker-reladted installed"
+echo "OK, docker-related installed"
 
 # docker gpg key
 echo "Installing gpg public key"
-curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add -
+curl -fsSL https://download.docker.com/linux/$ID/gpg | apt-key add -
 echo "OK, public key added."
 
 echo "add docker repository."
-add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/$ \
-                    (. /etc/os-release; echo "$ID") \
-                    $(lsb_release -cs) stable"
+add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/$ID $CODENAME stable"
 echo "OK, docker repository added"
 
 apt update
 
 echo "Installing nginx and docker-ce"
 apt install -y  nginx \
-                    docker-ce > /dev/null 2>&1
+                docker-ce
 echo "OK, Installed nginx, docker-ce"
 
 # Installing v2ray
@@ -76,32 +78,32 @@ echo "OK, Done."
 
 # iptables
 echo "firewall setting."
-ufw enable default
+ufw enable 
 ufw allow 80           # used by nginx webserver
 ufw allow 443          # used by https
 ufw allow 8080         # used by some test
 ufw allow 12022        # used by ssh server
-ufw allow $v2ray_port  # used by v2ray
+ufw allow $V2RAY_PORT  # used by v2ray
 echo "OK,firewall set."
 
 
-# add customized uuid
+# add customized UUID
 echo "set v2ray config.json"
-sed -i "s/\"id\": \"[a-z0-9_\-]*\"/\"id\": \"$(uuid)\"/" ./config.json
-sed -i "s/\"port\": [a-z0-9_]*/\"port\": $(v2ray_port)/" ./config.json
+sed -i "s/\"id\": \"[a-z0-9_\-]*\"/\"id\": \"$UUID\"/" ./config.json
+sed -i "s/\"port\": [a-z0-9_]*/\"port\": $V2RAY_PORT/" ./config.json
 mv ./config.json /etc/v2ray/
 echo "OK, config.json set."
 
 # upgrade linux kernel
 echo "Downloading and Upgrading linux kernel 4.9.76 for BBR"
-curl -fL http://kernel.ubuntu.com//~kernel-ppa/mainline/v4.9.76/linux-image-4.9.76-040976-generic_4.9.76-040976.201801100432_amd64.deb -O
-dpkg -i linux-image-4.9.76-040976-generic_4.9.76-040976.201801100432_amd64.deb
-update-grub > /dev/null 2>&1
+#curl -fL http://kernel.ubuntu.com//~kernel-ppa/mainline/v4.9.76/linux-image-4.9.76-040976-generic_4.9.76-040976.201801100432_amd64.deb -O
+#dpkg -i linux-image-4.9.76-040976-generic_4.9.76-040976.201801100432_amd64.deb
+#update-grub
 kernel_version=$(uname -r | cut -d '-' -f 1)
 echo "OK, Downloaded and Installed."
 
 # Use BBR algorithm
-echo "Use BBR algorithm"
+echo "Use BBR algorithm"S
 echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
 sysctl -p
@@ -134,15 +136,14 @@ else
     echo -e "$username is not in sudo group."
 fi
 
-echo    "                      upgrade os and installation over.           "
-echo    "Installed:   'vim, uuid-runtime, openssh-server, docker-ce, nginx, curl'"
-echo -e "\t       'htop, tcptrack, sudo, fail2ban, ufw, v2ray, zsh'"
-echo    "port allowed：  webserver port, https port, test port, ssh port"
-echo -e "\t\t\t    80         443       8080     12022"
-echo -e "v2ray:\t\t  v2ray_server_ip, v2ray_server_port, v2ray_uuid"
-echo -e "\t\t\t  $server_ip          $v2ray_port     $uuid"
-echo -e "\t\t  linux kernel version    non-root-user"
-echo -e "\t\t  $kernel_version           $username"
-echo -e "\t\t\t  shell script over, see ya!"
-echo -e "\t\t\t  Don't forget to reboot OS！"
+echo -e "upgrade os and installation over.\n\n \
+         Installed: vim, uuid-runtime, openssh-server, docker-ce, nginx, curl, htop, tcptrack, sudo, fail2ban, ufw, v2ray, zsh\n\n \
+         port allowed：  nginx port, https port, test port, ssh port\n\n \
+                              80         443       8080     12022\n\n \
+         v2ray: v2ray_server_ip,\t v2ray_server_port,\tv2ray_UUID\n\n \
+                 $SERVER_IP         $V2RAY_PORT           $UUID\n\n \
+         \t\t  linux kernel version    non-root-user\n\n \
+         \t\t\t $kernel_version           $username\n\n \
+         \t\t\t  shell script over, see ya!\n\n \
+         \t\t\t  Don't forget to reboot OS！"
 exit 0
