@@ -57,7 +57,7 @@ chown redis.redis ${REDIS_VAR_DIR}
 
 chmod 770 $REDIS_VAR_DIR -R
 
-touch $PIDFile
+touch $PIDFile /var/log/redis_6379.log
 
 chown redis:redis /var/log/redis_6379.log $PIDFile
 
