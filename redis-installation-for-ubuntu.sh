@@ -35,7 +35,7 @@ sed -i "s/supervised\ no/supervised systemd/g" $REDIS_CONF_FILE
 
 sed -i "s/\.\//\/var\/lib\/redis/g" $REDIS_CONF_FILE
 
-sed -i "s/logfile\ \"\"/logfile \"$REDIS_LOGFILE\"/g" $REDIS_CONF_FILE
+sed -i "s/logfile\ \"\"/logfile $REDIS_LOGFILE/g" $REDIS_CONF_FILE
 
 
 echo -e "[Unit]
