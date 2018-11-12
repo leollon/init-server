@@ -5,7 +5,9 @@
 # Created Time: Saturday, June 23, 2018 PM06:05:04 CST
 #########################################################################
 #!/bin/bash
+set -e
 
+REDIS_VERSION="redis-stable"
 REDIS_CONF_DIR="/etc/redis"
 REDIS_VAR_DIR="/var/lib/redis"
 REDIS_CONF_FILE="$REDIS_CONF_DIR/redis.conf"
@@ -15,11 +17,11 @@ PIDFile="/var/run/redis_6379.pid"
 
 apt install build-essential tcl
 
-curl -O http://download.redis.io/redis-stable.tar.gz
+curl -O http://download.redis.io/$(REDIS_VERSION).tar.gz
 
-tar xzvf redis-stable.tar.gz
+tar xzvf REDIS_VERSION.tar.gz
 
-cd redis-stable
+cd $(REDIS_VERSION)
 
 make && make test
 
