@@ -15,7 +15,7 @@ REDIS_LOGFILE="\/var\/log\/redis_6379.log"
 PIDFile="/var/run/redis_6379.pid"
 
 
-apt install build-essential tcl
+apt install build-essential tcl -yqq
 
 curl -O http://download.redis.io/${REDIS_VERSION}.tar.gz
 
