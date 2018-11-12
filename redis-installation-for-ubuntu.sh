@@ -17,11 +17,11 @@ PIDFile="/var/run/redis_6379.pid"
 
 apt install build-essential tcl
 
-curl -O http://download.redis.io/$(REDIS_VERSION).tar.gz
+curl -O http://download.redis.io/${REDIS_VERSION}.tar.gz
 
-tar xzvf REDIS_VERSION.tar.gz
+tar xzvf ${REDIS_VERSION}.tar.gz
 
-cd $(REDIS_VERSION)
+cd ${REDIS_VERSION}
 
 make && make test
 
@@ -53,7 +53,7 @@ WantedBy=multi-user.target" > /etc/systemd/system/redis.service
 
 adduser --system --group --no-create-home redis
 
-chown redis.redis $REDIS_VAR_DIR
+chown redis.redis ${REDIS_VAR_DIR}
 
 chmod 770 $REDIS_VAR_DIR -R
 
