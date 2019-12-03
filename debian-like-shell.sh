@@ -79,11 +79,11 @@ echo "OK, Done."
 # iptables
 echo "firewall setting."
 ufw enable 
-ufw allow 80           # used by nginx webserver
-ufw allow 443          # used by https
-ufw allow 8080         # used by some test
-ufw allow 12022        # used by ssh server
-ufw allow $V2RAY_PORT  # used by v2ray
+ufw allow 80                    # used by nginx webserver
+ufw allow 443                   # used by https
+ufw allow 8080                  # used by some test
+ufw allow 12022                 # used by ssh server
+ufw allow $V2RAY_SERVER_PORT    # used by v2ray
 echo "OK,firewall set."
 
 
