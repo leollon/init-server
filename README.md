@@ -18,6 +18,7 @@ Software List on server
 - [x] zsh
 - [x] jq
 - [x] docker-compose
+- [x] ntp
 
 After script finished, download client-config.json file and change its vnext's `address` and `port`.
 

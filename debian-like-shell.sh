@@ -31,7 +31,7 @@ apt-get update && apt-get upgrade -y && apt-get autoremove --purge -y
 # basic software
 apt-get install -qq vim openssh-server uuid-runtime \
                     curl sudo ufw fail2ban \
-                    tcptrack htop zsh jq
+                    tcptrack htop zsh jq ntp
 echo -e "${GREEN}OK, basic software installed.${NOCOLOR}"
 
 UUID=$(uuidgen)
@@ -137,6 +137,7 @@ systemctl enable v2ray.service
 systemctl enable ufw.service
 systemctl enable fail2ban.service
 systemctl enable docker.service
+systemctl enable ntp.service
 echo -e "${GREEN}OK, service set.${NOCOLOR}"
 
 echo -e "${YELLOW}create a non-root user?${NOCOLOR}"
@@ -160,7 +161,7 @@ then
 fi
 
 echo -e "${GREEN}upgrade os and installation over."
-echo -e "Installed: vim, uuid-runtime, openssh-server, docker-ce, nginx, curl, htop, tcptrack, sudo, fail2ban, ufw, v2ray, zsh, git, jq, docker-compose"
+echo -e "Installed: vim, uuid-runtime, openssh-server, docker-ce, nginx, curl, htop, tcptrack, sudo, fail2ban, ufw, v2ray, zsh, git, jq, docker-compose, ntp"
 echo -e "Allowed port: web: 80 and 443, test: 8080, ssh: 22, v2ray: ${V2RAY_SERVER_PORT}"
 echo -e "v2ray_server_ip: ${SERVER_IP}, v2ray_server_port: ${V2RAY_SERVER_PORT}, v2ray_uuid: ${UUID}"
 echo -e "Linux kernel version: ${kernel_version}, docker-compose version: ${docker_compose_version}"
