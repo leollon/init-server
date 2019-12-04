@@ -7,8 +7,12 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NOCOLOR='\033[0m'
+export LC_ALL=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+
 username=''
 password=''
+docker_compose_version='1.25.0'
 
 if [ "${USER}" != "root" ]
 then
@@ -16,13 +20,18 @@ then
     exit 1
 fi
 
+timedatectl set-timezone UTC
+timedatectl set-ntp true
+timedatectl set-local-rtc 0
+
+
 # upgrade OS
 apt-get update && apt-get upgrade -y && apt-get autoremove --purge -y
 
 # basic software
-apt-get install -qq  vim openssh-server uuid-runtime \
+apt-get install -qq vim openssh-server uuid-runtime \
                     curl sudo ufw fail2ban \
-                    tcptrack htop zsh
+                    tcptrack htop zsh jq
 echo -e "${GREEN}OK, basic software installed.${NOCOLOR}"
 
 UUID=$(uuidgen)
@@ -47,7 +56,7 @@ echo -e "${GREEN}OK, docker gpg public key added.${NOCOLOR}"
 
 # docker-related
 echo -e "${GREEN}Installing docker-related.${NOCOLOR}"
-apt-get install -qq  apt-transport-https \
+apt-get install -qq apt-transport-https \
                     ca-certificates gnupg2 \
                     software-properties-common
 echo -e "${GREEN}OK, docker-related installed.${NOCOLOR}"
@@ -56,13 +65,15 @@ echo -e "${YELLOW}add docker repository.${NOCOLOR}"
 add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/${ID} ${CODENAME} stable"
 echo -e "${GREEN}OK, docker repository added.${NOCOLOR}"
 
-echo -e "${YELLOW}Installing nginx and docker-ce.${NOCOLOR}"
+echo -e "${YELLOW}Installing nginx docker-ce and docker-compose.${NOCOLOR}"
 apt update && apt-get install -qq  nginx docker-ce
+curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 echo -e "${GREEN}OK, Installed nginx, docker-ce.${NOCOLOR}"
 
 # Installing v2ray
 echo -e "${YELLOW}Installing v2ray.${NOCOLOR}"
-bash <(curl -sL https://install.direct/go.sh) > /dev/null 2>&1
+bash <(curl -sL https://install.direct/go.sh)
 echo -e "${GREEN}OK, v2ray installed.${NOCOLOR}"
 
 # back up v2ray config.json
@@ -77,7 +88,7 @@ fi
 
 echo -e "${YELLOW}get new v2ray config.json.${NOCOLOR}"
 curl -fsSL https://raw.githubusercontent.com/leollon/my-new-debian-like-on-server/master/server-config.json -O
-curl -fsSL https://raw.githubusercontent.com/leollon/my-new-debian-like-on-server/master/client-config.json -o ./config.json
+curl -fsSL https://raw.githubusercontent.com/leollon/my-new-debian-like-on-server/master/client-config.json -O
 echo -e "${GREEN}OK, Done.${NOCOLOR}"
 
 # iptables
@@ -99,11 +110,11 @@ sed -i "s/\"id\": \"[a-z0-9_\-]*\"/\"id\": \"${UUID}\"/" ./server-config.json
 sed -i "s/\"port\": [a-z0-9_]*/\"port\": ${V2RAY_SERVER_PORT}/" ./server-config.json
 
 # config v2ray client
-sed -i "s/\"port\": V2RAY_CLIENT_PORT/\"port\": ${V2RAY_CLIENT_PORT}/" ./config.json
-sed -i "s/\"address\": \"[A-Z0-9_]*\"/\"address\": \"${SERVER_IP}\"/" ./config.json
-sed -i "s/\"port\": V2RAY_SERVER_PORT/\"port\": ${V2RAY_SERVER_PORT}/" ./config.json
+sed -i "s/\"port\": V2RAY_CLIENT_PORT/\"port\": ${V2RAY_CLIENT_PORT}/" ./client-config.json
+sed -i "s/\"address\": \"[A-Z0-9_]*\"/\"address\": \"${SERVER_IP}\"/" ./client-config.json
+sed -i "s/\"port\": V2RAY_SERVER_PORT/\"port\": ${V2RAY_SERVER_PORT}/" ./client-config.json
 sed -i "s/\"id\": \"[a-z0-9_\-]*\"/\"id\": \"${UUID}\"/" ./client-config.json
-mv ./server-config.json /etc/v2ray/config.json
+cp ./server-config.json /etc/v2ray/config.json
 echo -e "${GREEN}OK, config.json set.${NOCOLOR}"
 
 # upgrade linux kernel
@@ -118,7 +129,7 @@ echo -e "${GREEN}OK, Downloaded and Installed.${NOCOLOR}"
 echo -e "${GREEN}Use BBR algorithm.${NOCOLOR}"
 echo -e "net.core.default_qdisc=fq" >> /etc/sysctl.conf
 echo -e "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
-echo -e "${RED}Have to reboot make bbr usable.${NOCOLOR}"
+echo -e "${RED}Have to reboot to make bbr usable.${NOCOLOR}"
 
 # Some service automatically start on boot
 echo -e "${YELLOW}auto-start service on boot.${NOCOLOR}"
@@ -149,10 +160,11 @@ then
 fi
 
 echo -e "${GREEN}upgrade os and installation over."
-echo -e "Installed: vim, uuid-runtime, openssh-server, docker-ce, nginx, curl, htop, tcptrack, sudo, fail2ban, ufw, v2ray, zsh, git"
+echo -e "Installed: vim, uuid-runtime, openssh-server, docker-ce, nginx, curl, htop, tcptrack, sudo, fail2ban, ufw, v2ray, zsh, git, jq, docker-compose"
 echo -e "Allowed port: web: 80 and 443, test: 8080, ssh: 22, v2ray: ${V2RAY_SERVER_PORT}"
 echo -e "v2ray_server_ip: ${SERVER_IP}, v2ray_server_port: ${V2RAY_SERVER_PORT}, v2ray_uuid: ${UUID}"
-echo -e "Linux kernel: ${kernel_version}, non-root-user: ${username:-not-set}, ${username:-not-set}'s password: ${password:-not-set}"
+echo -e "Linux kernel version: ${kernel_version}, docker-compose version: ${docker_compose_version}"
+echo -e "non-root-user: ${username:-not-set}, ${username:-not-set}'s password: ${password:-not-set}"
 echo -e "Over, see ya!${NOCOLOR}"
 echo -e "${YELLOW}Do not forget to reboot OS!!${NOCOLOR}"
 

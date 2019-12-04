@@ -16,6 +16,8 @@ Software List on server
 - [x] ufw
 - [x] fail2ban
 - [x] zsh
+- [x] jq
+- [x] docker-compose
 
 After script finished, download client-config.json file and change its vnext's `address` and `port`.
 
